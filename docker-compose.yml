@@ -1,0 +1,12 @@
+name: mysql-employees
+services:
+  db:
+    image: genschsa/mysql-employees
+    environment:
+      - MYSQL_ROOT_PASSWORD=college
+    ports:
+      - "3307:3306"
+    volumes:
+      - employees-volume:${DOCKER_DATABASE_VOLUME:-/var/lib/mysql}
+volumes:
+  employees-volume:
