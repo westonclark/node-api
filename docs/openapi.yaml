@@ -1,0 +1,334 @@
+openapi: 3.0.3
+info:
+  title: Node API
+  version: 0.0.0
+  description: Employees, titles and salaries API.
+servers:
+  - url: http://127.0.0.1:3000
+    description: Local development
+tags:
+  - name: Employees
+  - name: Titles
+  - name: Salaries
+
+paths:
+  /employees:
+    get:
+      tags: [Employees]
+      summary: List employees
+      description: >
+        Returns employees, limited to 10 by default. When `title` is provided,
+        only employees with that title are returned and each includes its `title`.
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, default: 10 }
+        - name: title
+          in: query
+          schema: { type: string, minLength: 1, maxLength: 50 }
+      responses:
+        '200':
+          description: List of employees
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/EmployeeWithTitle' }
+    post:
+      tags: [Employees]
+      summary: Create an employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NewEmployee' }
+      responses:
+        '201':
+          description: Created employee
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Employee' }
+
+  /employees/{employeeNumber}:
+    parameters:
+      - $ref: '#/components/parameters/EmployeeNumber'
+    get:
+      tags: [Employees]
+      summary: Get an employee
+      responses:
+        '200':
+          description: The employee
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Employee' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Employees]
+      summary: Update an employee
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PatchEmployee' }
+      responses:
+        '200':
+          description: Updated employee
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Employee' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Employees]
+      summary: Delete an employee
+      responses:
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /titles:
+    get:
+      tags: [Titles]
+      summary: List titles
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, default: 10 }
+        - name: employeeNumber
+          in: query
+          schema: { $ref: '#/components/schemas/RecordId' }
+      responses:
+        '200':
+          description: List of titles
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Title' }
+    post:
+      tags: [Titles]
+      summary: Create a title
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Title' }
+      responses:
+        '201':
+          description: Created title
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Title' }
+        '4XX': { $ref: '#/components/responses/ClientError' }
+
+  /titles/{employeeNumber}/{title}/{fromDate}:
+    parameters:
+      - $ref: '#/components/parameters/EmployeeNumber'
+      - name: title
+        in: path
+        required: true
+        schema: { type: string, minLength: 1, maxLength: 50 }
+      - $ref: '#/components/parameters/FromDate'
+    get:
+      tags: [Titles]
+      summary: Get a title
+      responses:
+        '200':
+          description: The title
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Title' }
+        '4XX': { $ref: '#/components/responses/ClientError' }
+    patch:
+      tags: [Titles]
+      summary: Update a title
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PatchTitle' }
+      responses:
+        '200':
+          description: Updated title
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Title' }
+        '4XX': { $ref: '#/components/responses/ClientError' }
+    delete:
+      tags: [Titles]
+      summary: Delete a title
+      responses:
+        '204': { description: Deleted }
+        '4XX': { $ref: '#/components/responses/ClientError' }
+
+  /salaries:
+    post:
+      tags: [Salaries]
+      summary: Create a salary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Salary' }
+      responses:
+        '201':
+          description: Created salary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Salary' }
+        '4XX': { $ref: '#/components/responses/ClientError' }
+
+  /salaries/{employeeNumber}:
+    get:
+      tags: [Salaries]
+      summary: List an employee's salaries
+      parameters:
+        - $ref: '#/components/parameters/EmployeeNumber'
+      responses:
+        '200':
+          description: List of salaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Salary' }
+
+  /salaries/{employeeNumber}/{fromDate}:
+    parameters:
+      - $ref: '#/components/parameters/EmployeeNumber'
+      - $ref: '#/components/parameters/FromDate'
+    get:
+      tags: [Salaries]
+      summary: Get a salary
+      responses:
+        '200':
+          description: The salary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Salary' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Salaries]
+      summary: Update a salary
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PatchSalary' }
+      responses:
+        '200':
+          description: Updated salary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Salary' }
+        '4XX': { $ref: '#/components/responses/ClientError' }
+    delete:
+      tags: [Salaries]
+      summary: Delete a salary
+      responses:
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+components:
+  parameters:
+    EmployeeNumber:
+      name: employeeNumber
+      in: path
+      required: true
+      schema: { $ref: '#/components/schemas/RecordId' }
+    FromDate:
+      name: fromDate
+      in: path
+      required: true
+      schema: { type: string, format: date }
+
+  responses:
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ClientError:
+      description: Client error (e.g. validation, not found, conflict)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+  schemas:
+    RecordId:
+      type: integer
+      minimum: 1
+      maximum: 2147483647
+    Gender:
+      type: string
+      enum: [M, F, O]
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [message]
+          properties:
+            message: { type: string }
+            name: { type: string }
+            code: { type: string }
+    NewEmployee:
+      type: object
+      required: [firstName, lastName, birthDate, hireDate, gender]
+      properties:
+        firstName: { type: string, minLength: 1, maxLength: 14 }
+        lastName: { type: string, minLength: 1, maxLength: 16 }
+        birthDate: { type: string, format: date }
+        hireDate: { type: string, format: date }
+        gender: { $ref: '#/components/schemas/Gender' }
+    PatchEmployee:
+      type: object
+      properties:
+        firstName: { type: string, minLength: 1, maxLength: 14 }
+        lastName: { type: string, minLength: 1, maxLength: 16 }
+        birthDate: { type: string, format: date }
+        hireDate: { type: string, format: date }
+        gender: { $ref: '#/components/schemas/Gender' }
+    Employee:
+      allOf:
+        - type: object
+          required: [employeeNumber]
+          properties:
+            employeeNumber: { $ref: '#/components/schemas/RecordId' }
+        - $ref: '#/components/schemas/NewEmployee'
+    EmployeeWithTitle:
+      allOf:
+        - $ref: '#/components/schemas/Employee'
+        - type: object
+          properties:
+            title:
+              type: string
+              description: Present only when filtering by `title`.
+    Title:
+      type: object
+      required: [employeeNumber, title, fromDate]
+      properties:
+        employeeNumber: { $ref: '#/components/schemas/RecordId' }
+        title: { type: string, minLength: 1, maxLength: 50 }
+        fromDate: { type: string, format: date }
+        toDate: { type: string, format: date, nullable: true }
+    PatchTitle:
+      type: object
+      properties:
+        employeeNumber: { $ref: '#/components/schemas/RecordId' }
+        title: { type: string, minLength: 1, maxLength: 50 }
+        fromDate: { type: string, format: date }
+        toDate: { type: string, format: date, nullable: true }
+    Salary:
+      type: object
+      required: [employeeNumber, salary, fromDate, toDate]
+      properties:
+        employeeNumber: { type: integer }
+        salary: { type: integer, minimum: 1, maximum: 2147483647 }
+        fromDate: { type: string, format: date }
+        toDate: { type: string, format: date }
+    PatchSalary:
+      type: object
+      properties:
+        salary: { type: integer, minimum: 1, maximum: 2147483647 }
+        fromDate: { type: string, format: date }
+        toDate: { type: string, format: date }
